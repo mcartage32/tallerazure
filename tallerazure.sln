@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31613.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tallerazure.Common", "tallerazure.Common\tallerazure.Common.csproj", "{E693A26C-F09F-4A11-9EFA-8E054894B333}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tallerazure.Common", "tallerazure.Common\tallerazure.Common.csproj", "{E693A26C-F09F-4A11-9EFA-8E054894B333}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tallerazure.Functions", "tallerazure.Functions\tallerazure.Functions.csproj", "{6BE7218A-66D2-458E-B7BD-2841BFDB1C37}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tallerazure.Functions", "tallerazure.Functions\tallerazure.Functions.csproj", "{6BE7218A-66D2-458E-B7BD-2841BFDB1C37}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tallerazure.Test", "tallerazure.Test\tallerazure.Test.csproj", "{A2DADD7B-C13B-483A-AC18-B97A821AD1B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tallerazure.Test", "tallerazure.Test\tallerazure.Test.csproj", "{A2DADD7B-C13B-483A-AC18-B97A821AD1B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
