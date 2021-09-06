@@ -90,7 +90,7 @@ namespace tallerazure.Functions.Functions
             Time time = JsonConvert.DeserializeObject<Time>(requestBody);
 
             //VALIDAR EL ID DEL time
-            TableOperation findOperation = TableOperation.Retrieve<TimeEntity>("TIME", id);
+            TableOperation findOperation = TableOperation.Retrieve<TimeEntity>("TIME",id);
             TableResult findResult = await timetable.ExecuteAsync(findOperation);
 
             if (findResult.Result == null)
