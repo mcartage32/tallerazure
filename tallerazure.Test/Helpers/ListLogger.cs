@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace TodoMarcelo.Tests.Helpers
+namespace tallerazure.Test.Helpers
 {
     public class ListLogger : ILogger
     {

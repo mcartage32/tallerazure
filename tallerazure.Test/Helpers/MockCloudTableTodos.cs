@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TodoMarcelo.Tests.Helpers
+namespace tallerazure.Test.Helpers
 {
     public class MockCloudTableTodos : CloudTable
     {

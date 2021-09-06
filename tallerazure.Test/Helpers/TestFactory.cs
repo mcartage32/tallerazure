@@ -10,7 +10,7 @@ using System.Text;
 using tallerazure.Common.Models;
 using tallerazure.Functions.Entities;
 
-namespace TodoMarcelo.Tests.Helpers
+namespace tallerazure.Test.Helpers
 {
     public class TestFactory
     {
