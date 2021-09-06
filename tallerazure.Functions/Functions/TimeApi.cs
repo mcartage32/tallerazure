@@ -21,11 +21,11 @@ namespace tallerazure.Functions.Functions
         [FunctionName(nameof(CreateTime))]
         public static async Task<IActionResult> CreateTime(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "time")] HttpRequest req,
-            [Table("todo", Connection = "AzureWebJobsStorage")] CloudTable todotable,
+            [Table("time", Connection = "AzureWebJobsStorage")] CloudTable timetable,
             ILogger log)
         {
             //LE MANDAMOS UN MENSAJE AL LOG Y LEEMOS EL BODY
-            log.LogInformation("Recieved a new todo.");
+            log.LogInformation("Recieved a new time.");
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 
             // ACA CREAMOS UN OBJETO time QUE DESERIALIZA EL JSON DE LO QUE LEYO EL BODY
@@ -37,7 +37,7 @@ namespace tallerazure.Functions.Functions
                 return new BadRequestObjectResult(new Response
                 {
                     IsSucess = false,
-                    Message = "The request must have a TaskDescription."
+                    Message = "The request must have a Id of employed."
 
                 });
 
@@ -47,11 +47,11 @@ namespace tallerazure.Functions.Functions
             TimeEntity timeEntity = new TimeEntity
             {
                 EmployedId = (int)time.EmployedId,
-                Date = DateTime.UtcNow,
+                Date = (DateTime)time.Date,
                 Type = (int)time.Type,
                 IsConsolidated = false,
                 ETag = "*",
-                PartitionKey = "TODO",
+                PartitionKey = "TIME",
                 RowKey = Guid.NewGuid().ToString(),
                 
             };
@@ -59,10 +59,10 @@ namespace tallerazure.Functions.Functions
             //DEL NUGGET LLAMAMOS LA CLASE TableOperation PARA INSERTAR EL OBJETO DE LA ENTIDAD
             TableOperation addOperation = TableOperation.Insert(timeEntity);
             // EJECUTAMOS LA OPERACION
-            await todotable.ExecuteAsync(addOperation);
+            await timetable.ExecuteAsync(addOperation);
 
             //SI TODO FUNCIONO CORRECTAMENTE CREAMOS UN MENSAJE DE BIEN HECHO Y LO CARGAMOS AL LOG (CONSOLA)
-            string message = "New todo stored in table.";
+            string message = "New time stored in table.";
             log.LogInformation(message);
 
 
@@ -72,6 +72,92 @@ namespace tallerazure.Functions.Functions
                 IsSucess = true,
                 Message = message,
                 Result = timeEntity,
+
+
+            });
+        }
+
+        // EDITAR ENTRADA POR ID
+        [FunctionName(nameof(UpdateTime))]
+        public static async Task<IActionResult> UpdateTime(
+     [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "time/{id}")] HttpRequest req,
+     [Table("time", Connection = "AzureWebJobsStorage")] CloudTable timetable,
+     string id,
+     ILogger log)
+        {
+            log.LogInformation($"Update for time {id} recieved.");
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            Time time = JsonConvert.DeserializeObject<Time>(requestBody);
+
+            //VALIDAR EL ID DEL time
+            TableOperation findOperation = TableOperation.Retrieve<TimeEntity>("TIME", id);
+            TableResult findResult = await timetable.ExecuteAsync(findOperation);
+
+            if (findResult.Result == null)
+            {
+                return new BadRequestObjectResult(new Response
+                {
+                    IsSucess = false,
+                    Message = "Employed not found."
+
+                });
+
+            }
+
+            //Validacion del campo taskdescription y actualizamos la descripcion y actualizamos a que si se hizo en la propiedad completado
+
+            TimeEntity timeEntity = (TimeEntity)findResult.Result;
+
+            timeEntity.Date = (DateTime)time.Date;
+            timeEntity.Type = (int)time.Type;
+
+            //DEL NUGGET LLAMAMOS LA CLASE TableOperation PARA REEMPLAZAR EL OBJETO DE LA ENTIDAD
+            TableOperation addOperation = TableOperation.Replace(timeEntity);
+            // EJECUTAMOS LA OPERACION
+            await timetable.ExecuteAsync(addOperation);
+
+            //SI TODO FUNCIONO CORRECTAMENTE CREAMOS UN MENSAJE DE BIEN HECHO Y LO CARGAMOS AL LOG (CONSOLA)
+            string message = $"Employed {id}, update in table.";
+            log.LogInformation(message);
+
+
+            // RETORNAMOS UNA RESPUESTA POSITIVA CON QUE SI SE CUMPLIO LA EJECUCION, CON EL MENSAJE Y CON LA ENTIDAD CREADA
+            return new OkObjectResult(new Response
+            {
+                IsSucess = true,
+                Message = message,
+                Result = timeEntity,
+
+
+            });
+        }
+
+
+        //OBTENER TODAS LAS ENTRADAS
+        [FunctionName(nameof(GetAllTime))]
+        public static async Task<IActionResult> GetAllTime(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "time")] HttpRequest req,
+            [Table("time", Connection = "AzureWebJobsStorage")] CloudTable timetable,
+            ILogger log)
+        {
+            
+            log.LogInformation("Get all employeds received.");
+
+            TableQuery<TimeEntity> query = new TableQuery<TimeEntity>();
+            TableQuerySegment<TimeEntity> todos = await timetable.ExecuteQuerySegmentedAsync(query, null);
+
+
+            //SI TODO FUNCIONO CORRECTAMENTE CREAMOS UN MENSAJE DE BIEN HECHO Y LO CARGAMOS AL LOG (CONSOLA)
+            string message = "Retrieved all employeds.";
+            log.LogInformation(message);
+
+
+            // RETORNAMOS UNA RESPUESTA POSITIVA CON QUE SI SE CUMPLIO LA EJECUCION, CON EL MENSAJE Y CON LA ENTIDAD CREADA
+            return new OkObjectResult(new Response
+            {
+                IsSucess = true,
+                Message = message,
+                Result = todos,
 
 
             });
