@@ -78,8 +78,6 @@ namespace tallerazure.Test.Helpers
         }
 
 
-
-
         public static Stream GenerateStreamFromString(string stringToConvert)
         {
             MemoryStream stream = new MemoryStream();
@@ -104,6 +102,63 @@ namespace tallerazure.Test.Helpers
 
             return logger;
         }
+
+        // **********************----NUEVOS METODOS----------**************
+        public static List<TimeEntity> GetTimesEntityList()
+        {
+            return new List<TimeEntity>
+            {
+                new TimeEntity
+                {    EmployedId = 123,
+                     Date = DateTime.UtcNow,
+                     Type = 0,
+                    IsConsolidated  = false,
+                    ETag = "*",
+                    PartitionKey = "TIME",
+                    RowKey = Guid.NewGuid().ToString(),   
+                },
+                new TimeEntity
+                {
+                    EmployedId = 123,
+                    Date = DateTime.UtcNow,
+                    Type = 1,
+                    IsConsolidated  = false,
+                    ETag = "*",
+                    PartitionKey = "TIME",
+                    RowKey = Guid.NewGuid().ToString(),
+                }
+            };
+        }
+
+        public static List<Time> GetTimesList()
+        {
+            return new List<Time>
+            {
+                new Time {
+                    EmployedId = 123,
+                    Date = DateTime.UtcNow,
+                    Type = 1,
+                    IsConsolidated  = false,
+                },
+                new Time {
+                    EmployedId = 123,
+                    Date = DateTime.UtcNow,
+                    Type = 0,
+                    IsConsolidated  = false,
+                }
+            };
+        }
+
+
+        public static DefaultHttpRequest CreateHttpRequestList(List<Time> timeRequest)
+        {
+            string request = JsonConvert.SerializeObject(timeRequest, Formatting.Indented);
+            return new DefaultHttpRequest(new DefaultHttpContext())
+            {
+                Body = GenerateStreamFromString(request)
+            };
+        }
+
 
 
 
