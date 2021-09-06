@@ -1,13 +1,13 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Microsoft.WindowsAzure.Storage.Table;
+using Newtonsoft.Json;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 using tallerazure.Common.Models;
 using tallerazure.Common.Responses;
 using tallerazure.Functions.Entities;
@@ -32,7 +32,7 @@ namespace tallerazure.Functions.Functions
             Time time = JsonConvert.DeserializeObject<Time>(requestBody);
 
             // ACA VERIFICAMOS SI EL OBJETO time EN SU CAMPO ID ES NULO
-            if (time?.EmployedId ==null)
+            if (time?.EmployedId == null)
             {
                 return new BadRequestObjectResult(new Response
                 {
@@ -53,7 +53,7 @@ namespace tallerazure.Functions.Functions
                 ETag = "*",
                 PartitionKey = "TIME",
                 RowKey = Guid.NewGuid().ToString(),
-                
+
             };
 
             //DEL NUGGET LLAMAMOS LA CLASE TableOperation PARA INSERTAR EL OBJETO DE LA ENTIDAD
@@ -80,10 +80,10 @@ namespace tallerazure.Functions.Functions
         // EDITAR ENTRADA POR ID
         [FunctionName(nameof(UpdateTime))]
         public static async Task<IActionResult> UpdateTime(
-     [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "time/{id}")] HttpRequest req,
-     [Table("time", Connection = "AzureWebJobsStorage")] CloudTable timetable,
-     string id,
-     ILogger log)
+           [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "time/{id}")] HttpRequest req,
+           [Table("time", Connection = "AzureWebJobsStorage")] CloudTable timetable,
+           string id,
+           ILogger log)
         {
             log.LogInformation($"Update for time {id} recieved.");
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
@@ -140,7 +140,7 @@ namespace tallerazure.Functions.Functions
             [Table("time", Connection = "AzureWebJobsStorage")] CloudTable timetable,
             ILogger log)
         {
-            
+
             log.LogInformation("Get all employeds received.");
 
             TableQuery<TimeEntity> query = new TableQuery<TimeEntity>();
@@ -164,7 +164,82 @@ namespace tallerazure.Functions.Functions
         }
 
 
+        //OBTENER ENTRADA POR ID
+        [FunctionName(nameof(GetTimeById))]
+        public static IActionResult GetTimeById(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "time/{id}")] HttpRequest req,
+            [Table("time", "TIME", "{id}", Connection = "AzureWebJobsStorage")] TimeEntity timeEntity,
+            string id,
+            ILogger log)
+        {
+            //LE MANDAMOS UN MENSAJE AL LOG Y VALIDAMOS SI EL OBJETO todoEntity NO LLEGO NULO
+            log.LogInformation($"Get employed by id:{id}, received.");
 
+            if (timeEntity == null)
+            {
+                return new BadRequestObjectResult(new Response
+                {
+                    IsSucess = false,
+                    Message = "Todo not found."
+
+                });
+
+            }
+
+
+ 
+            string message = $"Employed {timeEntity.RowKey} retrieved.";
+            log.LogInformation(message);
+
+
+            
+            return new OkObjectResult(new Response
+            {
+                IsSucess = true,
+                Message = message,
+                Result = timeEntity,
+
+
+            });
+        }
+
+
+        //BORRAR POR ID DEL REGISTRO
+        [FunctionName(nameof(DeleteTime))]
+        public static async Task<IActionResult> DeleteTime(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "time/{id}")] HttpRequest req,
+            [Table("time", "TIME","{id}", Connection = "AzureWebJobsStorage")] TimeEntity timeEntity,
+            [Table("time", Connection = "AzureWebJobsStorage")] CloudTable todotable,
+            string id,
+            ILogger log)
+        {
+            
+            log.LogInformation($"Delete employed :{id}, received.");
+
+            if (timeEntity == null)
+            {
+                return new BadRequestObjectResult(new Response
+                {
+                    IsSucess = false,
+                    Message = "Todo not found."
+
+                });
+
+            }
+
+            await todotable.ExecuteAsync(TableOperation.Delete(timeEntity));
+            string message = $"Employed {timeEntity.RowKey} deleted.";
+            log.LogInformation(message);
+
+            return new OkObjectResult(new Response
+            {
+                IsSucess = true,
+                Message = message,
+                Result = timeEntity,
+
+
+            });
+        }
 
     }
 }
