@@ -144,7 +144,7 @@ namespace tallerazure.Functions.Functions
             log.LogInformation("Get all employeds received.");
 
             TableQuery<TimeEntity> query = new TableQuery<TimeEntity>();
-            TableQuerySegment<TimeEntity> todos = await timetable.ExecuteQuerySegmentedAsync(query, null);
+            TableQuerySegment<TimeEntity> times = await timetable.ExecuteQuerySegmentedAsync(query, null);
 
 
             //SI TODO FUNCIONO CORRECTAMENTE CREAMOS UN MENSAJE DE BIEN HECHO Y LO CARGAMOS AL LOG (CONSOLA)
@@ -157,7 +157,7 @@ namespace tallerazure.Functions.Functions
             {
                 IsSucess = true,
                 Message = message,
-                Result = todos,
+                Result = times,
 
 
             });
@@ -180,7 +180,7 @@ namespace tallerazure.Functions.Functions
                 return new BadRequestObjectResult(new Response
                 {
                     IsSucess = false,
-                    Message = "Todo not found."
+                    Message = "Time row not found."
 
                 });
 

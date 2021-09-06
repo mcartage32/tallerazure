@@ -17,6 +17,7 @@ namespace tallerazure.Functions.Functions
 {
     public static class ConsolidatedApi
     {
+        //METODO DE CONSOLIDADO
         [FunctionName(nameof(ConsolidatedProcess))]
         public static async Task<IActionResult> ConsolidatedProcess(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "consolidated")] HttpRequest req,
@@ -134,6 +135,53 @@ namespace tallerazure.Functions.Functions
             });
 
 
+        }
+
+
+        //OBTENER ENTRADA POR UNA FECHA
+        [FunctionName(nameof(GetConsolidatedByDate))]
+        public static async Task<IActionResult> GetConsolidatedByDate(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "consolidated/{date}")] HttpRequest req,
+            [Table("consolidated",  Connection = "AzureWebJobsStorage")] CloudTable consolidatedtable,
+            string date,
+            ILogger log)
+        {
+
+            string[] separatedDate = date.Split("-");
+
+            DateTime realdate = new DateTime(int.Parse(separatedDate[0]), int.Parse(separatedDate[1]), int.Parse(separatedDate[2]));
+
+            // filtro para traer los registros por la fecha
+            string filter = TableQuery.GenerateFilterConditionForDate("Date", QueryComparisons.Equal,realdate);
+            //generamos la consulta con el filtro y lo casteamos
+            TableQuery<ConsolidatedEntity> queryTime = new TableQuery<ConsolidatedEntity>().Where(filter);
+            //ejecutamos la consulta y estos serian los registros no consolidados sin ordenar
+            TableQuerySegment<ConsolidatedEntity> messyTimes = await consolidatedtable.ExecuteQuerySegmentedAsync(queryTime, null);
+
+
+            if (Object.ReferenceEquals(null,messyTimes)|| messyTimes.Results.Count == 0)
+            {
+                return new OkObjectResult(new Response
+                {
+                    IsSucess = false,
+                    Message = "Bad Query Result"
+
+                });
+
+            }
+
+
+            string message = $"Retrieved all consolidated row by date: {realdate}.";
+            log.LogInformation(message);
+
+            return new OkObjectResult(new Response
+            {
+                IsSucess = true,
+                Message = message,
+                Result = messyTimes,
+
+
+            });
         }
     }
 }
